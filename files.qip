@@ -1,0 +1,74 @@
+# Authoritative synthesis source list.  Keep game RTL here, never in sys/.
+# Quartus reads this file but cannot edit it -- add and remove entries by hand.
+set_global_assignment -name SEARCH_PATH rtl/main
+set_global_assignment -name QIP_FILE sys/sys.qip
+
+# 68010
+set_global_assignment -name VHDL_FILE rtl/lib/TG68K/TG68K_Pack.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/TG68K/TG68K_ALU.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/TG68K/TG68KdotC_Kernel.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/TG68K/TG68K.vhd
+
+# JSA CPUs/chips
+set_global_assignment -name VHDL_FILE rtl/lib/T65/T65_Pack.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/T65/T65_MCode.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/T65/T65_ALU.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/T65/T65.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/T65/T65_wrap.vhd
+set_global_assignment -name VHDL_FILE rtl/lib/POKEY/POKEY.vhd
+set_global_assignment -name QIP_FILE rtl/lib/jt51/hdl/jt51.qip
+
+# Main CPU side
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main/toobin_addr_decode.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main/toobin_irq_wd.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main/toobin_eeprom_2804.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main/toobin_nvram_io.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main/toobin_main_bus.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main/toobin_cpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/main/toobin_inputs.sv
+
+# SDRAM/ROM path
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/toobin_dpram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/toobin_rom_loader.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/toobin_sdram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/toobin_gfx_mem.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/toobin_sdram_loader.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/mem/toobin_cpurom_sdram.sv
+
+# Video
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_raster.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_vscroll_ctrl.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_vram_cpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_tile_reorg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_tile_dec.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_char_rom.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_alpha_render.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_pf_render.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_mo_list.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_mo_pos.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_mo_gfx.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_mo_linebuf.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_mo_render.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_priority.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_palette.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_video.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/analog_hsize.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_analog_adjust.sv
+
+# JSA board
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa_cen.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_sound_comm.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa_decode.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa_mem.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa_io.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa_bus.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_pokey.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_ym.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa_mix.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_pokey_out.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa_lpf.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/toobin_jsa.sv
+
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/toobin_core.sv
+set_global_assignment -name SDC_FILE Toobin.sdc
+set_global_assignment -name SYSTEMVERILOG_FILE Toobin.sv
