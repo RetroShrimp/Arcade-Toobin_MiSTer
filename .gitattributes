@@ -1,0 +1,7 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Binary release artifacts must never be line-ending normalized
+*.rbf binary
+*.sof binary
+*.qar binary
