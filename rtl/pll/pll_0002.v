@@ -13,7 +13,9 @@ module  pll_0002(
 	// interface 'outclk1'
 	output wire outclk_1,
 
-	// interface 'outclk2'  -- SDRAM clock (64 MHz, -112.5 deg of clk_sys: the READ-CAPTURE phase, set by hardware sweep -- see tests/build_phase_sweep.sh)
+	// interface 'outclk2'  -- SDRAM clock (64 MHz, -112.5 deg of clk_sys).  This is
+	// the READ-CAPTURE phase: it was set by sweeping real hardware, because neither
+	// simulation nor static timing analysis can observe that path.
 	output wire outclk_2,
 
 	// interface 'locked'

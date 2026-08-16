@@ -88,7 +88,8 @@ set_multicycle_path -hold -end 1 \
 #  (-45..-180 deg on one board, shifted ~25 deg on two others that were failing);
 #  STA predicted the wrong answer every time it was consulted.  outclk_2 is now
 #  -112.5 deg, the centre of the window verified good on every board tested.
-#  See tests/build_phase_sweep.sh.
+#  Re-derive it the only way that works: build one bitstream per candidate phase
+#  and test them on real boards.
 # ============================================================================
 create_generated_clock -name SDRAM_CLK \
   -source [get_pins -compatibility_mode {*|pll|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk}] \
