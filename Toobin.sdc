@@ -74,12 +74,21 @@ set_multicycle_path -hold -end 1 \
 
 # ============================================================================
 #  SDRAM external I/O timing (MT48LC16M16 class, CL2, 64 MHz controller).
-#  SDRAM_CLK is PLL outclk_2 (64 MHz, -180 deg of clk_sys) wired straight to the
+#  SDRAM_CLK is PLL outclk_2 (64 MHz, -112.5 deg of clk_sys) wired straight to the
 #  pin -- a clean phase-controlled clock, so these delays can actually close.
 #  Values from the MT48LC16M16 datasheet (same chip as the sibling cores).
 #  If Quartus reports the -source PLL node cannot be found, open Timing Analyzer
 #  -> Report Clocks and substitute the actual outclk_2 ...general[2]...divclk path;
 #  if it does not apply the SDRAM I/O just falls back to unconstrained (no break).
+#  DO NOT TUNE THE READ-CAPTURE PHASE FROM THIS REPORT.  The Setup Summary is keyed
+#  by the CAPTURE clock, so the SDRAM_CLK row is the command/write LAUNCH, and the DQ
+#  return is buried in the clk_sys row with ordinary core logic -- neither isolates
+#  the capture, and the spread across refits is the same size as the effect.  An
+#  eight-point hardware sweep in 2026-08 found the working window empirically
+#  (-45..-180 deg on one board, shifted ~25 deg on two others that were failing);
+#  STA predicted the wrong answer every time it was consulted.  outclk_2 is now
+#  -112.5 deg, the centre of the window verified good on every board tested.
+#  See tests/build_phase_sweep.sh.
 # ============================================================================
 create_generated_clock -name SDRAM_CLK \
   -source [get_pins -compatibility_mode {*|pll|pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk}] \
@@ -93,7 +102,7 @@ set_input_delay  -clock SDRAM_CLK -min 2.5 [get_ports {SDRAM_DQ[*]}]
 set_output_delay -clock SDRAM_CLK -max  1.5 [get_ports {SDRAM_A[*] SDRAM_BA[*] SDRAM_DQ[*] SDRAM_DQML SDRAM_DQMH SDRAM_nCS SDRAM_nRAS SDRAM_nCAS SDRAM_nWE SDRAM_CKE}]
 set_output_delay -clock SDRAM_CLK -min -0.8 [get_ports {SDRAM_A[*] SDRAM_BA[*] SDRAM_DQ[*] SDRAM_DQML SDRAM_DQMH SDRAM_nCS SDRAM_nRAS SDRAM_nCAS SDRAM_nWE SDRAM_CKE}]
 
-# The controller launches/captures on clk_sys (outclk_0); SDRAM_CLK is 180 deg from
+# The controller launches/captures on clk_sys (outclk_0); SDRAM_CLK is phase-shifted from
 # it, so allow the read the proper (next) capture edge instead of the half-cycle one.
 # Endpoints must be CLOCK collections (get_clocks), not pins.  get_clocks does Tcl
 # string-matching where [..] is a char class, so match the literal "general[0]" with

@@ -13,7 +13,7 @@ module  pll_0002(
 	// interface 'outclk1'
 	output wire outclk_1,
 
-	// interface 'outclk2'  -- SDRAM clock (64 MHz, -180 deg of clk_sys)
+	// interface 'outclk2'  -- SDRAM clock (64 MHz, -112.5 deg of clk_sys: the READ-CAPTURE phase, set by hardware sweep -- see tests/build_phase_sweep.sh)
 	output wire outclk_2,
 
 	// interface 'locked'
@@ -32,7 +32,7 @@ module  pll_0002(
 		.phase_shift1("0 ps"),
 		.duty_cycle1(50),
 		.output_clock_frequency2("64.000000 MHz"),
-		.phase_shift2("-7813 ps"),
+		.phase_shift2("-4883 ps"),
 		.duty_cycle2(50),
 		.output_clock_frequency3("0 MHz"),
 		.phase_shift3("0 ps"),

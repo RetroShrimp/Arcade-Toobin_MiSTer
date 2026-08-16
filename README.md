@@ -43,6 +43,14 @@ will not work even though only 3 MB of the module is used. Bandwidth matters as 
 as capacity here: the tile prefetch alone issues roughly 192 reads per scanline, which
 is why `clk_sys` runs at 64 MHz rather than 32.
 
+Running the memory that fast leaves the controller only half a clock period to capture
+read data, so the phase of the clock the SDRAM chip runs on matters. Builds before
+2026-08-15 used a value that worked on some boards and not others: on a module or board
+at the wrong end of normal variation the graphics data came back a fraction too late and
+the riverbanks rendered in water blue with scrambled sprites, while the text, scrolling
+and geometry stayed perfect. If you are running an older build and see that, update —
+the capture phase is now centred in the range measured to work across every board tested.
+
 ## Installation
 
 1. Copy `releases/Toobin_YYYYMMDD.rbf` to `_Arcade/cores/` on the SD card.
@@ -69,6 +77,12 @@ button, which the cabinet also uses as Start — there is no separate Start butt
 
 Both players have their own coin button; the cabinet has two chutes and the core
 wires them separately.
+
+**The four D-pad directions are unused.** MiSTer's controller-mapping screen asks you
+to assign Up/Down/Left/Right before it gets to the named buttons — that prompt comes
+from the framework and every core gets it, whether or not the arcade hardware had a
+stick. Toobin' did not: the PCB reads six digital inputs per player and nothing else.
+Map the directions to whatever you like, or skip past them; the core ignores them.
 
 ## Options
 
