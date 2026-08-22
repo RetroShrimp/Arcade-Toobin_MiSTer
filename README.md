@@ -167,11 +167,12 @@ There are no outstanding hardware tests.
 
 MAME is this project's functional oracle, and every gate above measures the core
 *against* it — so this is a narrow claim, not a general one. It applies where the
-SP-320 schematics document something MAME's model does not, and in two of the six
+SP-320 schematics document something MAME's model does not, and in three of the seven
 cases MAME's own source flags the gap.
 
 | Behaviour | MAME | This core |
 | --- | --- | --- |
+| Pixel priority merge | `toobin.cpp` brackets it with `not verified: logic is all controlled in a PAL`: playfield pen bit 3 *gates* the merge, and the motion object's own priority bits are ignored | the dumped PAL 7E equation — each layer's pen bit 3 *selects* which of its two priority bits is compared, and `LBPRI1:0` participates |
 | JSA I `/MIX` low-pass bit | `atarijsa.cpp` carries `TODO: emulate the low pass filter!` — the bit does nothing | the real 2nd-order filter, component by component |
 | POKEY stereo gating | `atarijsa.cpp` notes it is "currently only mono, only looking at `ym2151_ct1`" | CT1 gates the POKEY feed into the left path, CT2 into the right, independently |
 | Alpha character flip | `(data >> 10) & 1` taken as the flip bit | sheet 6 routes `ANHFLIP` to **D11**; D10 reaches only the optional `ANROMA14/VPP` socket pin, which the populated 16 KiB rev-3 character ROM never decodes |
@@ -189,14 +190,25 @@ not on the LPF bit alone. POKEY's own output stage comes from the same sheet: pi
 `AUD` is a current output feeding LM324 2B as a transimpedance stage, whose single
 signal-path pole is R34 × C37 = 7.2 kHz.
 
-**Where MAME is still the authority.** The pixel priority network is PAL 7E on sheet 16
-and no fuse map for it exists, so `toobin_priority.sv` carries MAME's functional model —
-with the hardware's `LBPRI1:0` bits preserved through the renderer but deliberately
-unused — rather than a guessed equation. The sibling Atari System 2 schematic implements
-the same factor list as a discrete 4-bit adder used as a comparator, which suggests the
-real term is finer than that approximation; that is recorded, not implemented. The
-analog chain beyond the poles above is left alone on the same principle: no invented IIR
-is passed off as hardware accuracy.
+**The priority merge is the one backed by a fuse dump.** PAL 7E on sheet 16, Atari part
+136061-1151, was brute-forced from a real part and tested on a board, so
+`toobin_priority.sv` carries the silicon equation rather than a model of it. The two
+differ structurally: MAME treats playfield pen bit 3 as a gate that must be set before
+the playfield may cover a motion object, where the hardware uses it only to *select*
+which of that layer's two priority bits is compared; and MAME ignores the motion
+object's own `LBPRI1:0` bits, where on hardware a motion object whose selected bit is
+set beats the playfield. 24 of the 64 opaque-motion-object input combinations disagree.
+
+None of those 24 is reachable in this game. Across all six ROM sets, 54,000 frames each
+of attract, gameplay and self-test, no motion object carrying pixel data is ever given a
+non-zero priority, and the playfield only ever uses priority `00` or `10`. Under those
+two constraints the hardware equation reduces to exactly MAME's condition, so the two
+agree on every frame Toobin' can produce. The equation is implemented because it is what
+the silicon does; the scan is reported because a divergence you cannot observe should be
+described as one.
+
+The analog chain beyond the poles above is still left alone on the original principle:
+no invented IIR is passed off as hardware accuracy.
 
 ## Known deviations and open questions
 
@@ -209,18 +221,7 @@ the full recipe can be posted, tailored to the equipment you have.
 
 ### Would change behaviour
 
-**1. Priority PAL 7E (136061-1151) — a 1024-vector truth-table capture.** The one that
-matters most. The PAL on sheet 16 resolves playfield / motion-object / alpha priority
-and has never been dumped, so `toobin_priority.sv` carries MAME's functional
-approximation, which collapses the `LBPRI1:0` against `PFPRI1:0` comparison to
-"playfield category non-zero". The sibling Atari System 2 board builds the same factor
-list from a discrete 4-bit adder used as a comparator, so the real term is very likely
-finer than that. The pin table is verified and each output code's *meaning* is already
-known from the F153 wiring, so a capture yields a directly implementable selector
-rather than an opaque table. Sweep all 1024 input vectors with `/CRAM` swept as an
-input — do not tie it inactive.
-
-**2. Raster seams — a purpose-built diagnostic ROM and a capture.** No documentary
+**1. Raster seams — a purpose-built diagnostic ROM and a capture.** No documentary
 source can answer these, because the shipping ROM never performs the qualifying
 writes: a 12,000-frame trace of rev 3 saw no `D0=0` VSCROLL write at all. Two ROMs are
 specified in full:
@@ -238,7 +239,7 @@ where the answer is a relationship to RGB and sync.
 
 ### Cosmetic or archival
 
-**3. Video DAC — a 32-step voltage sweep per channel.** Sheet 16 shows an R/2R ladder
+**2. Video DAC — a 32-step voltage sweep per channel.** Sheet 16 shows an R/2R ladder
 *and* a 74F260 five-input NOR acting as an all-bits-zero detect, both feeding the same
 analog summing node — which is why colour code 0 is treated differently from every
 nonzero code, and which shows the pedestal is real hardware rather than an emulator
@@ -247,18 +248,18 @@ normalisation: whether the pedestal lands precisely at +38/255, and whether the 
 slope is exactly 7 per code, depends on transistor V<sub>BE</sub>, saturation and
 resistor tolerance.
 
-**4. End-to-end audio transfer.** The `/MIX` Sallen-Key and the POKEY transimpedance
+**3. End-to-end audio transfer.** The `/MIX` Sallen-Key and the POKEY transimpedance
 pole are derived from sheet 21's component values, but the baseline response of the
 whole LM324 chain has never been measured. Nothing beyond those two poles has been
 invented to fill the gap.
 
-**5. HSYNC / VSYNC edge placement.** The counter geometry and the sheet-5 388–391 VSYNC
+**4. HSYNC / VSYNC edge placement.** The counter geometry and the sheet-5 388–391 VSYNC
 interval pass an exhaustive gate, but the exact edges have never been checked against a
 scope on a real board.
 
 ### Needs a document, not a board
 
-**6. JSA `/RDIO` D6.** Resolved here from sheet 22's LS240, against MAME comments that
+**5. JSA `/RDIO` D6.** Resolved here from sheet 22's LS240, against MAME comments that
 contradict each other between JSA I/II and JSA III. The JSA I stand-alone audio PCB
 (Atari A-043713) is shared with Blasteroids, Vindicators, Xybots and Skull & Crossbones,
 so **SP-316**, **SP-317** and **SP-313** carry the same audio sheets — a second scan
@@ -294,6 +295,11 @@ methodology come from the author's Atari System 2 (Paperboy) work.
 Thanks to the MAME team, whose `toobin.cpp`, `atarijsa` and `atarimo` code served as
 the functional oracle throughout, and to whoever preserved the Atari SP-320 schematic
 package.
+
+Thanks also to **Caius**, who brute-forced the priority PAL (136061-1151) off a real
+board, to **gamefixer**, who tested the result on hardware, and to the **PLD Archive**
+for hosting it. That dump is the reason this core's compositor implements the actual
+equation rather than an approximation.
 
 Toobin' and its ROMs, artwork and manuals are © Atari Games. This project contains no
 copyrighted ROM data.
